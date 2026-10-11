@@ -27,13 +27,15 @@ Every error is JSON: `{"error": {"code": "...", "message": "..."}}`.
 | HTTP | code | Meaning |
 |---|---|---|
 | 400 | BAD_REQUEST | Bad or missing parameter. Fix the request. |
-| 403 | LOGIN_REQUIRED | YouTube asked for sign-in (age limit, members-only, or a bot check on the server IP). Retry later. |
+| 403 | LOGIN_REQUIRED | YouTube asked for sign-in (age limit, members-only). This server does not sign in. |
 | 404 | UNAVAILABLE | Video is private, deleted or blocked. |
 | 422 | DRM, LIVE, UNPLAYABLE, NO_FORMATS | This video cannot be downloaded. |
 | 502 | UPSTREAM | YouTube refused the request. Retry once. |
+| 503 | BOT_CHECK | YouTube blocked this server's IP with "Sign in to confirm you're not a bot". Retry later. |
 
 ## Limits
 
 - One request runs for at most 300 seconds. Long videos at high quality can hit that limit; ask for a lower `quality` or download `type=audio`.
 - Merged MP4 and MP3 responses have no `Content-Length` and no `Range` support. Raw `itag` and M4A/Opus responses have both.
 - Live streams and DRM-protected videos are not supported.
+- YouTube flags datacenter IPs. On this server, many videos return `BOT_CHECK`; popular videos pass more often.

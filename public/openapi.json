@@ -96,7 +96,7 @@
                   "properties": {
                     "code": {
                       "type": "string",
-                      "enum": ["BAD_REQUEST", "LOGIN_REQUIRED", "UNAVAILABLE", "DRM", "LIVE", "UNPLAYABLE", "NO_FORMATS", "UPSTREAM", "INTERNAL"]
+                      "enum": ["BAD_REQUEST", "LOGIN_REQUIRED", "BOT_CHECK", "UNAVAILABLE", "DRM", "LIVE", "UNPLAYABLE", "NO_FORMATS", "UPSTREAM", "INTERNAL"]
                     },
                     "message": { "type": "string" }
                   },
