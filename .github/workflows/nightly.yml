@@ -23,7 +23,7 @@ jobs:
         run: LIVE_BASE_URL=https://yt-downloader-five-blush.vercel.app npm run test:live
       - name: File issue on failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const open = await github.rest.issues.listForRepo({ ...context.repo, labels: 'ci-failure', state: 'open' });
