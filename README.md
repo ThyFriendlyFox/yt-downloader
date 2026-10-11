@@ -10,6 +10,7 @@ Live: https://yt-downloader-five-blush.vercel.app
 | Who | How |
 |---|---|
 | Person | Open the page, paste a URL, click a quality. |
+| Agent with a shell (own IP) | `npx -y github:ThyFriendlyFox/yt-downloader "https://youtu.be/dQw4w9WgXcQ" --quality 1080` |
 | Script or agent | `curl -OJ "https://yt-downloader-five-blush.vercel.app/api/download?url=https://youtu.be/dQw4w9WgXcQ"` |
 | MCP client | `claude mcp add --transport http yt-downloader https://yt-downloader-five-blush.vercel.app/mcp` |
 
@@ -26,7 +27,7 @@ Details: [`agent-kit/docs/ARCHITECTURE.md`](agent-kit/docs/ARCHITECTURE.md).
 
 ## Limits
 
-- YouTube runs a bot check on datacenter IPs, including Vercel's. Many videos return `503 BOT_CHECK` on the hosted copy. Run the app on a home machine for better coverage.
+- YouTube runs a bot check on datacenter IPs, including Vercel's. Many videos return `503 BOT_CHECK` on the hosted copy. The `npx` command runs the downloader on your machine, so YouTube sees your IP instead.
 - One download runs for at most 300 seconds.
 - Live streams and DRM-protected videos are not supported.
 - Downloading from YouTube is against YouTube's Terms of Service. Copyright law applies to the content. Use it for content you have the right to download.

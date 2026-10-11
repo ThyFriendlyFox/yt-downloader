@@ -54,3 +54,13 @@ I tested a PO-token route past the check and stopped: it evades bot detection.
 The queue now holds bot-check visibility, a self-host guide, subtitles and clips.
 
 Evidence: `npm run verify` green; `LIVE_BASE_URL=<prod> npm run test:live` 5/5 green.
+
+## 2026-10-11 — Added a local command that downloads from your own IP
+
+The human asked for downloads from the client's IP, not Vercel's.
+A server cannot send requests from a visitor's IP, and browsers block the page from reading YouTube.
+So I added `bin/ytdl.js`, which runs the same code on the caller's machine.
+Agents run it with `npx -y github:ThyFriendlyFox/yt-downloader <url>`.
+I moved the fetch-plan-probe step into `lib/service.js`, so the API and the command share it.
+
+Evidence: `npm run verify` green; local 360p MP4 and MP3 downloads.

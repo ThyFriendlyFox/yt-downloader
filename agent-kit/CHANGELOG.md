@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/) · Versioning: [SemVer](
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-11
+### Added
+- `ytdl` command: `npx -y github:ThyFriendlyFox/yt-downloader <url>` downloads on your own machine, so YouTube sees your IP instead of the server's.
+
 ## [1.0.0] - 2026-10-11
 ### Added
 - Web page: paste a YouTube URL, get one download link per quality and per audio format.

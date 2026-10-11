@@ -9,6 +9,17 @@ All paths are relative to the host that served this file.
 1. `GET /api/download?url=<youtube-url-or-id>` returns the file itself (MP4, best quality, video and audio merged).
 2. Save it with the filename from the `Content-Disposition` header: `curl -OJ "<host>/api/download?url=https://youtu.be/dQw4w9WgXcQ"`.
 
+## Run on your own IP
+
+YouTube bot-checks this server's IP (error `BOT_CHECK`). An agent with a shell can run the same downloader locally, so YouTube sees the agent's own IP:
+
+```sh
+npx -y github:ThyFriendlyFox/yt-downloader "https://youtu.be/dQw4w9WgXcQ" --quality 1080
+npx -y github:ThyFriendlyFox/yt-downloader dQw4w9WgXcQ --type audio --format mp3 --out ./music
+```
+
+Options match `/api/download`: `--type`, `--quality`, `--codec`, `--format`, `--itag`, plus `--out <dir>` and `--info`. The last stdout line is JSON `{"file","bytes","title","id","itags"}`. Errors go to stderr as `{"error":{"code","message"}}` with exit code 1. Requires Node.js 20 or later.
+
 ## Endpoints
 
 - `GET /api/info?url=<url>`: JSON with title, author, duration_seconds, thumbnail, `downloads` (one ready URL per quality and audio format) and `formats` (every raw stream with its itag).
@@ -38,4 +49,4 @@ Every error is JSON: `{"error": {"code": "...", "message": "..."}}`.
 - One request runs for at most 300 seconds. Long videos at high quality can hit that limit; ask for a lower `quality` or download `type=audio`.
 - Merged MP4 and MP3 responses have no `Content-Length` and no `Range` support. Raw `itag` and M4A/Opus responses have both.
 - Live streams and DRM-protected videos are not supported.
-- YouTube flags datacenter IPs. On this server, many videos return `BOT_CHECK`; popular videos pass more often.
+- YouTube flags datacenter IPs. On this server, many videos return `BOT_CHECK`; popular videos pass more often. Use the local command above to download from your own IP.

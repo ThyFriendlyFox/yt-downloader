@@ -1,6 +1,6 @@
 {
   "name": "yt-downloader",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "YouTube downloader for people and AI agents. No captcha, no API key.",
   "scripts": {
     "dev": "node dev/server.js",
@@ -27,5 +27,8 @@
   "type": "module",
   "engines": {
     "node": ">=20"
+  },
+  "bin": {
+    "ytdl": "bin/ytdl.js"
   }
 }

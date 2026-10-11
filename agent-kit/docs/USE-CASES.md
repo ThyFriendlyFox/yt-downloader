@@ -23,6 +23,11 @@ Each case has the same shape.
 **Ask.** An agent calls `/api/info?url=<url>` and reads `downloads.video`.
 **Get.** One URL per quality with codec and size. The agent fetches one.
 
+## Download from your own IP
+
+**Ask.** An agent runs `npx -y github:ThyFriendlyFox/yt-downloader <url>` on its own machine.
+**Get.** The file on disk. YouTube sees the agent's IP, not the server's.
+
 ## Use as an MCP tool
 
 **Ask.** Add `<host>/mcp` as an HTTP MCP server. Call `get_download_link`.

@@ -1,12 +1,13 @@
 # Architecture
 
-YT Downloader is a set of Vercel Node.js functions plus one static page. The code has 5 parts.
+YT Downloader is a set of Vercel Node.js functions plus one static page. The code has 6 parts.
 
 | Part | Folder | Task |
 |---|---|---|
 | Page and agent docs | `public/` | The web page, `llms.txt`, `openapi.json`, `robots.txt` |
 | Functions | `api/` | One file per endpoint: `info.js`, `download.js`, `mcp.js` |
 | Library | `lib/` | YouTube access, format choice, streaming, ffmpeg, HTTP helpers |
+| CLI | `bin/ytdl.js` | Runs the download on the caller's machine and writes the file to disk |
 | Local server | `dev/server.js` | Serves `public/` and `api/` the way Vercel does, for dev and tests |
 | Gates | `verify/`, `test/` | Lint, build, unit tests, live tests |
 
@@ -30,7 +31,7 @@ YT Downloader is a set of Vercel Node.js functions plus one static page. The cod
 | `lib/formats.js` | Normalize youtubei.js formats; pick video and audio; safe filenames |
 | `lib/youtube.js` | InnerTube session, client fallback, error mapping, decipher shim |
 | `lib/media.js` | Ranged fetches, last-byte probe, ffmpeg merge and MP3 transcode |
-| `lib/service.js` | Option parsing, download plan, link building, info payload |
+| `lib/service.js` | Option parsing, download plan, `prepare` (fetch, plan, probe, fall back), link building, info payload |
 | `lib/http.js` | CORS, JSON responses, error responses, body reading |
 
 ## Boundaries

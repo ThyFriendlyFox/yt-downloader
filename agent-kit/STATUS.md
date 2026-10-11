@@ -14,6 +14,7 @@ behavior change. The weekly cycle (WEEKLY.md step 5) refreshes it.
 | MCP server (`/mcp`) | ✅ | unit test + live test `MCP get_download_link` green |
 | Agent docs (`/llms.txt`, `/openapi.json`) | ✅ | served, JSON parses in `npm run lint` |
 | Coverage of arbitrary videos on Vercel | 🚧 | YouTube answers `BOT_CHECK` for most videos from Vercel IPs; 6 of 7 sampled videos failed on 2026-10-11 |
+| Local CLI (`bin/ytdl.js`) | ✅ | `test/cli.test.js` green; MP4 360p (11.8 MB) and MP3 (5.1 MB) downloaded locally |
 | CI | 🚧 | `.github/workflows/ci.yml` runs `SKIP_LIVE=1 npm run verify`; first run pending |
 
 States: ✅ done (gated) · 🚧 in progress · ❌ not started · 🧊 frozen/won't do.
@@ -21,5 +22,5 @@ States: ✅ done (gated) · 🚧 in progress · ❌ not started · 🧊 frozen/w
 ## Current week
 
 - **Shipping:** between cycles
-- **Last release:** v1.0.0 — 2026-10-11
-- **Known red:** YouTube's bot check blocks most videos from Vercel's datacenter IPs. Plan: ROADMAP items 1 and 2.
+- **Last release:** v1.1.0 — 2026-10-11
+- **Known red:** YouTube's bot check blocks most videos from Vercel's datacenter IPs. Workaround: the local CLI runs on the caller's IP. Plan: ROADMAP items 1 and 2.

@@ -1,31 +1,8 @@
 import { pipeline } from 'node:stream/promises';
-import { getVideo, YouTubeError } from '../lib/youtube.js';
-import { parseOptions, plan } from '../lib/service.js';
+import { parseOptions, prepare } from '../lib/service.js';
 import { contentDisposition } from '../lib/formats.js';
-import { mergeToMp4, probe, rangeStream, transcodeToMp3 } from '../lib/media.js';
+import { mergeToMp4, rangeStream, transcodeToMp3 } from '../lib/media.js';
 import { cors, preflight, query, sendError } from '../lib/http.js';
-
-async function prepare(id, opts) {
-  const tried = [];
-  for (;;) {
-    let video;
-    try {
-      video = await getVideo(id, { exclude: tried });
-    } catch (err) {
-      if (tried.length) {
-        throw new YouTubeError('UPSTREAM', `googlevideo refused the stream URLs from clients: ${tried.join(', ')}.`, 502);
-      }
-      throw err;
-    }
-    const p = plan(video, opts);
-    const parts = p.mode === 'merge' ? [p.video, p.audio] : [p.format];
-    // Probe before any response bytes go out, so a dead URL can still fall back.
-    const urls = await Promise.all(parts.map((f) => video.resolveUrl(f).catch(() => null)));
-    const ok = await Promise.all(urls.map((u, i) => u !== null && probe(u, parts[i].size)));
-    if (ok.every(Boolean)) return { video, plan: p, urls };
-    tried.push(video.client);
-  }
-}
 
 function parseRange(header, size) {
   const m = /^bytes=(\d*)-(\d*)$/.exec(header ?? '');

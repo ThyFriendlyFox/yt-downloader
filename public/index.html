@@ -94,7 +94,11 @@
     <h2>For AI agents</h2>
     <p>No captcha, no API key, no sign-up. Every endpoint answers plain HTTP. Errors are JSON: <code>{"error":{"code","message"}}</code>.</p>
 
-    <h3>Download a file</h3>
+    <h3>Download from your own IP (recommended)</h3>
+<pre>npx -y github:ThyFriendlyFox/yt-downloader "https://youtu.be/dQw4w9WgXcQ" --quality 1080</pre>
+    <p class="note">Runs on your machine, so YouTube sees your IP, not this server's. Same options as the API, plus <code>--out</code> and <code>--info</code>. Requires Node.js 20 or later.</p>
+
+    <h3>Download a file from this server</h3>
 <pre>curl -OJ "<span class="origin"></span>/api/download?url=https://youtu.be/dQw4w9WgXcQ&amp;quality=1080"
 curl -OJ "<span class="origin"></span>/api/download?url=dQw4w9WgXcQ&amp;type=audio&amp;format=mp3"</pre>
 

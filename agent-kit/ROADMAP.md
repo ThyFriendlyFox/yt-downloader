@@ -54,6 +54,7 @@ blocks it.
 
 | Week | Feature | Release | Evidence |
 |---|---|---|---|
+| 2026-10-11 | Local CLI: download from the caller's own IP (`npx github:…`) | v1.1.0 | `test/cli.test.js`; local MP4 and MP3 downloads |
 | 2026-10-11 | Downloader page, HTTP API, MCP server, Vercel deploy | v1.0.0 | `npm run verify` green; live suite green against production |
 
 ## Explicitly not doing
@@ -66,3 +67,4 @@ blocks it.
 ## Queue changes
 
 - 2026-10-11 — Seeded the queue at setup. Marked provisional.
+- 2026-10-11 — The human asked for downloads from the client's IP. Shipped the local CLI out of queue order.
