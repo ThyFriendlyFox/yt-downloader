@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YT Downloader</title>
+<meta name="description" content="Download YouTube video as MP4 or audio as M4A, MP3 or Opus. No captcha, no API key. HTTP API and MCP server for AI agents.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e5322d'/%3E%3Cpath d='M16 7v13m-6-6 6 6 6-6M9 25h14' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="alternate" type="text/plain" title="Instructions for AI agents" href="/llms.txt">
+<link rel="service-desc" type="application/json" href="/openapi.json">
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --text: #18181b; --muted: #5f5f67; --line: #e3e3df;
+    --accent: #d92d27; --accent-text: #ffffff; --code-bg: #f0f0ec; --error: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111113; --panel: #1a1a1d; --text: #ececee; --muted: #a0a0a8; --line: #2c2c31;
+      --accent: #f0443e; --accent-text: #ffffff; --code-bg: #232327; --error: #ff8a80;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111113; --panel: #1a1a1d; --text: #ececee; --muted: #a0a0a8; --line: #2c2c31;
+    --accent: #f0443e; --accent-text: #ffffff; --code-bg: #232327; --error: #ff8a80;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 24px; letter-spacing: -0.02em; }
+  h2 { font-size: 18px; margin: 40px 0 12px; }
+  h3 { font-size: 15px; margin: 20px 0 8px; color: var(--muted); font-weight: 600; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; }
+  input[type=text] { flex: 1 1 320px; min-width: 0; padding: 12px 14px; font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  select, button { font: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); color: var(--text); }
+  button { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 600; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: progress; }
+  .card { margin-top: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .meta { display: flex; gap: 16px; align-items: flex-start; }
+  .meta img { width: 160px; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; flex: none; background: var(--code-bg); }
+  .meta h2 { margin: 0 0 4px; font-size: 17px; line-height: 1.35; overflow-wrap: anywhere; }
+  .meta p { margin: 0; color: var(--muted); font-size: 14px; }
+  .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .links a { display: flex; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; font-weight: 600; }
+  .links a:hover { border-color: var(--accent); }
+  .links small { color: var(--muted); font-weight: 400; }
+  .error { color: var(--error); margin-top: 16px; }
+  .note { color: var(--muted); font-size: 14px; }
+  code, pre { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); border-radius: 6px; }
+  code { padding: 1px 5px; overflow-wrap: anywhere; }
+  pre { padding: 12px 14px; overflow-x: auto; margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .table-wrap { overflow-x: auto; }
+  a { color: var(--accent); }
+  [hidden] { display: none !important; }
+  @media (max-width: 520px) { .meta { flex-direction: column; } .meta img { width: 100%; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>YT Downloader</h1>
+
+  <!-- Without JavaScript this form downloads directly. -->
+  <form id="form" action="/api/download" method="get">
+    <input id="url" name="url" type="text" inputmode="url" autocomplete="off" required
+           placeholder="https://www.youtube.com/watch?v=…" aria-label="YouTube URL or video ID">
+    <select name="quality" aria-label="Quality">
+      <option value="best">Best</option>
+      <option>2160</option><option>1440</option><option>1080</option><option>720</option>
+      <option>480</option><option>360</option><option>240</option><option>144</option>
+    </select>
+    <button id="go" type="submit">Download</button>
+  </form>
+
+  <p id="error" class="error" role="alert" hidden></p>
+
+  <section id="result" class="card" hidden aria-live="polite">
+    <div class="meta">
+      <img id="thumb" alt="">
+      <div>
+        <h2 id="title"></h2>
+        <p id="byline"></p>
+      </div>
+    </div>
+    <h3>Video (MP4)</h3>
+    <div id="video-links" class="links"></div>
+    <h3>Audio</h3>
+    <div id="audio-links" class="links"></div>
+  </section>
+
+  <section id="agents">
+    <h2>For AI agents</h2>
+    <p>No captcha, no API key, no sign-up. Every endpoint answers plain HTTP. Errors are JSON: <code>{"error":{"code","message"}}</code>.</p>
+
+    <h3>Download a file</h3>
+<pre>curl -OJ "<span class="origin"></span>/api/download?url=https://youtu.be/dQw4w9WgXcQ&amp;quality=1080"
+curl -OJ "<span class="origin"></span>/api/download?url=dQw4w9WgXcQ&amp;type=audio&amp;format=mp3"</pre>
+
+    <h3>Get video data and every download link</h3>
+<pre>curl "<span class="origin"></span>/api/info?url=dQw4w9WgXcQ"</pre>
+
+    <h3>MCP server (Streamable HTTP, stateless)</h3>
+<pre>claude mcp add --transport http yt-downloader <span class="origin"></span>/mcp</pre>
+    <p class="note">Tools: <code>get_video_info</code>, <code>get_download_link</code>.</p>
+
+    <h3><code>GET /api/download</code> parameters</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Name</th><th>Values</th><th>Default</th></tr>
+      <tr><td><code>url</code></td><td>YouTube URL (watch, youtu.be, shorts, embed, live) or video ID</td><td>required</td></tr>
+      <tr><td><code>type</code></td><td><code>video</code>, <code>audio</code></td><td><code>video</code></td></tr>
+      <tr><td><code>quality</code></td><td><code>best</code> or maximum height: 2160, 1440, 1080, 720, 480, 360, 240, 144</td><td><code>best</code></td></tr>
+      <tr><td><code>codec</code></td><td><code>any</code>, <code>h264</code>, <code>av1</code>, <code>vp9</code></td><td><code>any</code></td></tr>
+      <tr><td><code>format</code></td><td>video: <code>mp4</code>. audio: <code>m4a</code>, <code>mp3</code>, <code>opus</code></td><td><code>mp4</code> / <code>m4a</code></td></tr>
+      <tr><td><code>itag</code></td><td>One raw stream from <code>/api/info</code> formats. Supports <code>Range</code>.</td><td>none</td></tr>
+    </table>
+    </div>
+    <p class="note">Machine-readable: <a href="/llms.txt">/llms.txt</a> · <a href="/openapi.json">/openapi.json</a></p>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  // With JavaScript the page lists every quality, so the no-JS quality picker goes away.
+  document.querySelector('select[name=quality]').hidden = true;
+  const origin = location.origin;
+  document.querySelectorAll('.origin').forEach((el) => (el.textContent = origin));
+
+  const mb = (n) => (n ? `${(n / 1048576).toFixed(n < 10485760 ? 1 : 0)} MB` : '');
+  const time = (s) => {
+    if (s == null) return '';
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = String(s % 60).padStart(2, '0');
+    return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+  };
+  function link(label, sub, href) {
+    const a = document.createElement('a');
+    a.href = href;
+    a.setAttribute('download', '');
+    a.append(label);
+    if (sub) { const s = document.createElement('small'); s.textContent = sub; a.append(s); }
+    return a;
+  }
+
+  async function lookup(input) {
+    $('error').hidden = true;
+    $('result').hidden = true;
+    $('go').disabled = true;
+    $('go').textContent = 'Loading…';
+    try {
+      const res = await fetch(`/api/info?url=${encodeURIComponent(input)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message ?? `HTTP ${res.status}`);
+      $('thumb').src = data.thumbnail;
+      $('title').textContent = data.title;
+      $('byline').textContent = [data.author, time(data.duration_seconds)].filter(Boolean).join(' · ');
+      $('video-links').replaceChildren(
+        ...data.downloads.video.map((v) => link(v.quality, [v.video_codec.toUpperCase(), mb(v.approx_size)].filter(Boolean).join(' · '), v.url)),
+      );
+      $('audio-links').replaceChildren(
+        ...data.downloads.audio.map((a) => link(a.format.toUpperCase(), mb(a.approx_size), a.url)),
+      );
+      $('result').hidden = false;
+      history.replaceState(null, '', `?url=${encodeURIComponent(input)}`);
+    } catch (err) {
+      $('error').textContent = err.message;
+      $('error').hidden = false;
+    } finally {
+      $('go').disabled = false;
+      $('go').textContent = 'Download';
+    }
+  }
+
+  $('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    lookup($('url').value.trim());
+  });
+  const initial = new URLSearchParams(location.search).get('url');
+  if (initial) { $('url').value = initial; lookup(initial); }
+</script>
+</body>
+</html>

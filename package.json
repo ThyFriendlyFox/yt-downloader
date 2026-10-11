@@ -1,0 +1,31 @@
+{
+  "name": "yt-downloader",
+  "version": "1.0.0",
+  "description": "YouTube downloader for people and AI agents. No captcha, no API key.",
+  "scripts": {
+    "dev": "node dev/server.js",
+    "lint": "sh verify/lint.sh",
+    "test": "node --test test/*.test.js",
+    "build": "node verify/build.js",
+    "test:live": "node --test --test-concurrency=1 test/live/*.test.js",
+    "verify": "sh verify/verify.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThyFriendlyFox/yt-downloader.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThyFriendlyFox/yt-downloader/issues"
+  },
+  "homepage": "https://github.com/ThyFriendlyFox/yt-downloader#readme",
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "youtubei.js": "^18.1.0"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

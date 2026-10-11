@@ -1,0 +1,39 @@
+# YT Downloader
+
+> Download YouTube video as MP4, or audio as M4A, MP3 or Opus, over plain HTTP. No captcha, no API key, no sign-up, no rate-limit tokens. Built for AI agents and scripts.
+
+All paths are relative to the host that served this file.
+
+## Fastest path
+
+1. `GET /api/download?url=<youtube-url-or-id>` returns the file itself (MP4, best quality, video and audio merged).
+2. Save it with the filename from the `Content-Disposition` header: `curl -OJ "<host>/api/download?url=https://youtu.be/dQw4w9WgXcQ"`.
+
+## Endpoints
+
+- `GET /api/info?url=<url>`: JSON with title, author, duration_seconds, thumbnail, `downloads` (one ready URL per quality and audio format) and `formats` (every raw stream with its itag).
+- `GET /api/download?url=<url>&type=video|audio&quality=best|2160|1440|1080|720|480|360|240|144&codec=any|h264|av1|vp9&format=mp4|m4a|mp3|opus`: the file.
+  - Video is always MP4 with merged audio. `quality` is a maximum height. Use `codec=h264` for the widest player support (max 1080p).
+  - Audio `m4a` and `opus` are the original streams. `mp3` is transcoded on the server.
+  - `itag=<n>` returns one raw stream from `/api/info` formats and supports `Range` requests.
+  - `HEAD` returns the headers only.
+- `POST /mcp`: MCP server, Streamable HTTP transport, stateless, JSON responses. Tools: `get_video_info(url)`, `get_download_link(url, type, quality, codec, format)`.
+- `GET /openapi.json`: OpenAPI 3.1 description of the HTTP API.
+
+## Errors
+
+Every error is JSON: `{"error": {"code": "...", "message": "..."}}`.
+
+| HTTP | code | Meaning |
+|---|---|---|
+| 400 | BAD_REQUEST | Bad or missing parameter. Fix the request. |
+| 403 | LOGIN_REQUIRED | YouTube asked for sign-in (age limit, members-only, or a bot check on the server IP). Retry later. |
+| 404 | UNAVAILABLE | Video is private, deleted or blocked. |
+| 422 | DRM, LIVE, UNPLAYABLE, NO_FORMATS | This video cannot be downloaded. |
+| 502 | UPSTREAM | YouTube refused the request. Retry once. |
+
+## Limits
+
+- One request runs for at most 300 seconds. Long videos at high quality can hit that limit; ask for a lower `quality` or download `type=audio`.
+- Merged MP4 and MP3 responses have no `Content-Length` and no `Range` support. Raw `itag` and M4A/Opus responses have both.
+- Live streams and DRM-protected videos are not supported.

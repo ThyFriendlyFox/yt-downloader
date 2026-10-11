@@ -1,0 +1,147 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "YT Downloader",
+    "version": "1.0.0",
+    "description": "Download YouTube video as MP4 or audio as M4A, MP3 or Opus. No captcha, no API key."
+  },
+  "servers": [{ "url": "/" }],
+  "paths": {
+    "/api/info": {
+      "get": {
+        "operationId": "getVideoInfo",
+        "summary": "Get video data, every stream, and ready-made download URLs.",
+        "parameters": [{ "$ref": "#/components/parameters/url" }],
+        "responses": {
+          "200": {
+            "description": "Video data.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Info" } } }
+          },
+          "default": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/download": {
+      "get": {
+        "operationId": "download",
+        "summary": "Download the file. Video is MP4 with merged audio.",
+        "parameters": [
+          { "$ref": "#/components/parameters/url" },
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["video", "audio"], "default": "video" } },
+          {
+            "name": "quality",
+            "in": "query",
+            "description": "\"best\" or a maximum height.",
+            "schema": { "type": "string", "default": "best", "examples": ["best", "1080", "720"] }
+          },
+          { "name": "codec", "in": "query", "schema": { "type": "string", "enum": ["any", "h264", "av1", "vp9"], "default": "any" } },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "mp4 for video; m4a, mp3 or opus for audio.",
+            "schema": { "type": "string", "enum": ["mp4", "m4a", "mp3", "opus"] }
+          },
+          {
+            "name": "itag",
+            "in": "query",
+            "description": "Return one raw stream from /api/info formats. Supports Range.",
+            "schema": { "type": "integer" }
+          },
+          { "name": "Range", "in": "header", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file. Content-Disposition carries the filename.",
+            "content": {
+              "video/mp4": { "schema": { "type": "string", "format": "binary" } },
+              "audio/mp4": { "schema": { "type": "string", "format": "binary" } },
+              "audio/mpeg": { "schema": { "type": "string", "format": "binary" } },
+              "audio/webm": { "schema": { "type": "string", "format": "binary" } }
+            }
+          },
+          "206": { "description": "Partial content (raw itag, m4a and opus only)." },
+          "default": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/mcp": {
+      "post": {
+        "operationId": "mcp",
+        "summary": "MCP server, Streamable HTTP transport, stateless. Tools: get_video_info, get_download_link.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "200": { "description": "JSON-RPC response." }, "202": { "description": "Notification accepted." } }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "url": {
+        "name": "url",
+        "in": "query",
+        "required": true,
+        "description": "YouTube URL (watch, youtu.be, shorts, embed, live) or 11-character video ID.",
+        "schema": { "type": "string" }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "string",
+                      "enum": ["BAD_REQUEST", "LOGIN_REQUIRED", "UNAVAILABLE", "DRM", "LIVE", "UNPLAYABLE", "NO_FORMATS", "UPSTREAM", "INTERNAL"]
+                    },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Link": {
+        "type": "object",
+        "properties": {
+          "quality": { "type": "string" },
+          "format": { "type": "string" },
+          "video_codec": { "type": "string" },
+          "fps": { "type": ["integer", "null"] },
+          "approx_size": { "type": ["integer", "null"] },
+          "url": { "type": "string" }
+        }
+      },
+      "Info": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "author": { "type": ["string", "null"] },
+          "channel_id": { "type": ["string", "null"] },
+          "duration_seconds": { "type": ["integer", "null"] },
+          "views": { "type": ["integer", "null"] },
+          "thumbnail": { "type": "string" },
+          "webpage_url": { "type": "string" },
+          "downloads": {
+            "type": "object",
+            "properties": {
+              "best": { "type": "string" },
+              "video": { "type": "array", "items": { "$ref": "#/components/schemas/Link" } },
+              "audio": { "type": "array", "items": { "$ref": "#/components/schemas/Link" } }
+            }
+          },
+          "formats": { "type": "array", "items": { "type": "object" } }
+        }
+      }
+    }
+  }
+}
